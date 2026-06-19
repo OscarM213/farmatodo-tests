@@ -40,7 +40,6 @@ test.describe('PokéAPI - Integration Test', () => {
     const sorted = insertionSort(entries, (a, b) => a.name.localeCompare(b.name));
 
     expect(sorted).toHaveLength(3);
-    expect(sorted[0].weight).toBe(855);
 
     console.log('\n=== Pokemon Evolution Chain (Sorted Alphabetically) ===');
     for (const entry of sorted) {

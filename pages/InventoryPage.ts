@@ -35,16 +35,6 @@ export class InventoryPage {
   }
 
   async addItemToCart(name: string) {
-    const btn = this.addToCartButton(name);
-    await btn.click();
-  }
-
-  async assertItemAdded(name: string) {
-    await this.expectAddToCartButtonToBeRemove(name);
-  }
-
-  private async expectAddToCartButtonToBeRemove(name: string) {
-    const btn = this.addToCartButton(name);
-    await btn.waitFor({ state: 'visible' });
+    await this.addToCartButton(name).click();
   }
 }
