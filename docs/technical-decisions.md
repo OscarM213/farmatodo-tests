@@ -54,15 +54,16 @@ farmatodo-automation/
 
 ### 3. API Client Layer
 
-Separación en tres capas:
+Separación en dos capas:
 
 | Capa | Archivo | Responsabilidad |
 |---|---|---|
 | Schemas | `utils/schemas.ts` | Zod schemas + tipos inferidos |
-| Client | `api/client.ts` | HTTP calls + parsing + domain logic (traverse evolution chain) |
-| Spec | `tests/integration/*.spec.ts` | Flow, assertions, console output |
+| Client | `api/client.ts` | Solo HTTP calls + parsing Zod |
 
-Beneficio: el spec no conoce HTTP ni schemas — solo llama a `getSquirtleEvolutionChain(request)` y asevera.
+El API client es genérico — no tiene lógica de dominio ni funciones específicas de un Pokemon. Expone solo `fetchPokemon()`, `fetchSpecies()`, `fetchEvolutionChain()` que sirven para cualquier consulta.
+
+La orquestación (traverse chain, build entries, status checks) vive en el spec. Esto mantiene el cliente reutilizable y la lógica de negocio visible en el test.
 
 ### 4. Page Object Model
 

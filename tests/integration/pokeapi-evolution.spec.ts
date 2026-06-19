@@ -1,19 +1,46 @@
 import { test, expect } from '@playwright/test';
-import { getSquirtleEvolutionChain } from '../../api/client';
+import { fetchPokemon, fetchSpecies, fetchEvolutionChain } from '../../api/client';
 import { insertionSort } from '../../utils/sort';
+import type { ChainLink } from '../../utils/schemas';
 import type { PokemonEntry } from '../../utils/types';
+
+function extractEvolutionNames(chain: ChainLink): string[] {
+  const names: string[] = [];
+  function traverse(node: ChainLink) {
+    names.push(node.species.name);
+    for (const child of node.evolves_to) {
+      traverse(child);
+    }
+  }
+  traverse(chain);
+  return names;
+}
 
 test.describe('PokéAPI - Integration Test', () => {
   test('get Squirtle evolution chain, sort alphabetically, and display weights', async ({ request }) => {
-    const entries = await getSquirtleEvolutionChain(request);
+    const pokemon = await fetchPokemon(request, 'squirtle');
+    expect(pokemon.status).toBe(200);
 
-    expect(entries).toHaveLength(3);
-    const squirtle = entries.find((e: PokemonEntry) => e.name === 'squirtle')!;
-    expect(squirtle.weight).toBe(90);
+    const species = await fetchSpecies(request, pokemon.data.species.url);
+    expect(species.status).toBe(200);
 
-    const sorted = insertionSort(entries, (a: PokemonEntry, b: PokemonEntry) =>
-      a.name.localeCompare(b.name)
-    );
+    const chain = await fetchEvolutionChain(request, species.data.evolution_chain.url);
+    expect(chain.status).toBe(200);
+
+    const evolutionNames = extractEvolutionNames(chain.data.chain);
+    expect(evolutionNames).toEqual(['squirtle', 'wartortle', 'blastoise']);
+
+    const entries: PokemonEntry[] = [];
+    for (const name of evolutionNames) {
+      const p = await fetchPokemon(request, name);
+      expect(p.status).toBe(200);
+      entries.push({ name, weight: p.data.weight });
+    }
+
+    const sorted = insertionSort(entries, (a, b) => a.name.localeCompare(b.name));
+
+    expect(sorted).toHaveLength(3);
+    expect(sorted[0].weight).toBe(855);
 
     console.log('\n=== Pokemon Evolution Chain (Sorted Alphabetically) ===');
     for (const entry of sorted) {
