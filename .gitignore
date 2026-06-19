@@ -1,0 +1,11 @@
+node_modules/
+playwright-report/
+test-results/
+dist/
+*.tsbuildinfo
+allure-results/
+.env
+.env.local
+
+# Generated
+package-lock.json
